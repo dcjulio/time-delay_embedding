@@ -13,6 +13,9 @@ Python tool for reconstructing the phase space of a dynamical system from a sing
 
 ---
 
+## How to run this?
+First run fnn.py to find the suggested delay  **τ**. To know the dimension, then run fnn.py, using the delay **τ** obtained from fnn.py
+
 ## Background
 
 ### Why nonlinear dynamics?
