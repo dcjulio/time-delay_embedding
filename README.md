@@ -1,8 +1,9 @@
 # Phase-Space Reconstruction Toolkit
 
-Note: Only this README was written with AI (Claude Opus 5.5) in this repository.
+Note: Only this README was written with AI (Claude Opus 5.5) from a sample text I wrote.
 
 Python tool for reconstructing the phase space of a dynamical system from a single scalar time series using **time-delay embedding** (Taken's Theorem). The modules estimate the two parameters the reconstruction needs, the **embedding delay τ** and the **embedding dimension d**, and include the chaotic Lorenz system as a test signal. The code function takes a plain time series as input.
+
 
 | Parameter | What it controls | Method | Module |
 |-----------|------------------|--------|--------|
@@ -13,6 +14,12 @@ Python tool for reconstructing the phase space of a dynamical system from a sing
 ---
 
 ## Background
+
+### Why nonlinear dynamics?
+
+Techniques such as electroencephalography (EEG) capture the macroscopic dynamics of the brain's electrical activity as voltage differences between electrodes. A relatively recent approach to analysing these signals comes from nonlinear dynamical systems theory (chaos theory): the signal is treated as the output of a system whose time evolution is defined in some phase space. Because nonlinear systems can exhibit deterministic chaos, this is a natural starting point when a signal looks irregular (Stam, 2005).
+
+Once the phase space has been reconstructed, it can be characterised with invariants such as its fractal (correlation) dimension or its maximal Lyapunov exponent, which quantifies how unpredictable the dynamics are due to sensitivity to initial conditions. In the original project the goal was to use these tools to characterise the dynamics underlying epileptic seizures.
 
 ### The measurement problem
 
@@ -60,10 +67,10 @@ $$
 The ranges of X and X_τ are each split into N equal bins. Counting how many values fall into each bin (and each 2-D bin for the joint distribution) and dividing by the number of observations gives the probabilities P_X, P_Xτ and P_XXτ. The estimated mutual information for delay τ is
 
 $$
-\hat{I}(\tau) = \sum_{i=1}^{N}\sum_{j=1}^{N} P_{XX_\tau}(i,j)\, \log_2 \frac{P_{XX_\tau}(i,j)}{P_X(i)\,P_{X_\tau}(j)}
+\hat{I}(\tau) = \sum_{i=1}^{N}\sum_{j=1}^{N} P_{XX_\tau}(i,j)\, \ln \frac{P_{XX_\tau}(i,j)}{P_X(i)\,P_{X_\tau}(j)}
 $$
 
-This is computed for every delay up to *m*, and the optimal delay is the **first local minimum** of Î(τ). The implementation uses `numpy.histogram` and `numpy.histogram2d`, and reports values in bits.
+This is computed for every delay up to *m*, and the optimal delay is the **first local minimum** of Î(τ). The implementation uses `numpy.histogram` and `numpy.histogram2d`, and uses the natural logarithm, so values are in nats.
 
 ### API
 
@@ -80,9 +87,9 @@ Ixy, tau = AMI(X, m, nb=16, plot=False, verbose=False, initial_verbose=True)
 | `verbose` | Print the optimal delay when finished |
 | `initial_verbose` | Print a message when the computation starts |
 
-**Returns:** `Ixy`, an array with the mutual information (bits) for each delay `0 … m-1`, and `tau`, the optimal delay.
+**Returns:** `Ixy`, an array with the mutual information (nats) for each delay `0 … m-1`, and `tau`, the optimal delay.
 
-**Warning message:** `No first minimum within the given maximum delay` means the curve kept decreasing up to `m`. The code continues using the largest delay considered; increase `m` and run it again.
+**Warning message:** `No first minimum in the delay specified` means the curve kept decreasing up to `m`. The code continues with a delay of `m - 2`; increase `m` and run it again.
 
 ---
 
@@ -227,3 +234,4 @@ Developed during an internship at the Centro Interdisciplinario de Neurociencia 
 ## License
 
 This project is released under the terms of the license in the [LICENSE](LICENSE) file.
+
