@@ -1,8 +1,8 @@
 # Phase-Space Reconstruction Toolkit
 
-Lightweight Python tools for reconstructing the phase space of a dynamical system from a single scalar time series using **time-delay embedding**. The modules estimate the two parameters the reconstruction needs, the **embedding delay τ** and the **embedding dimension d**, and include the chaotic Lorenz system as a test signal.
+Note: Only this README was written with AI (Claude Opus 5.5) in this repository.
 
-The code was originally developed to analyse EEG recordings from an animal model of chronic epilepsy, but every function takes a plain time series as input, so it can be applied to any scalar signal.
+Python tool for reconstructing the phase space of a dynamical system from a single scalar time series using **time-delay embedding** (Taken's Theorem). The modules estimate the two parameters the reconstruction needs, the **embedding delay τ** and the **embedding dimension d**, and include the chaotic Lorenz system as a test signal. The code function takes a plain time series as input.
 
 | Parameter | What it controls | Method | Module |
 |-----------|------------------|--------|--------|
@@ -13,12 +13,6 @@ The code was originally developed to analyse EEG recordings from an animal model
 ---
 
 ## Background
-
-### Why nonlinear dynamics?
-
-Techniques such as electroencephalography (EEG) capture the macroscopic dynamics of the brain's electrical activity as voltage differences between electrodes. A relatively recent approach to analysing these signals comes from nonlinear dynamical systems theory (chaos theory): the signal is treated as the output of a system whose time evolution is defined in some phase space. Because nonlinear systems can exhibit deterministic chaos, this is a natural starting point when a signal looks irregular (Stam, 2005).
-
-Once the phase space has been reconstructed, it can be characterised with invariants such as its fractal (correlation) dimension or its maximal Lyapunov exponent, which quantifies how unpredictable the dynamics are due to sensitivity to initial conditions. In the original project the goal was to use these tools to characterise the dynamics underlying epileptic seizures.
 
 ### The measurement problem
 
@@ -80,7 +74,7 @@ Ixy, tau = AMI(X, m, nb=16, plot=False, verbose=False, initial_verbose=True)
 | Argument | Description |
 |----------|-------------|
 | `X` | Scalar time series |
-| `m` | Largest delay to consider |
+| `m` | Largest delay to consider (at least 3) |
 | `nb` | Number of histogram bins (default 16) |
 | `plot` | Plot mutual information vs. delay |
 | `verbose` | Print the optimal delay when finished |
@@ -148,7 +142,7 @@ R, dim = false_nearest_neighbors(x, tau, D, thr, plot=False, verbose=False, init
 xs = Lorenz(n, plot=False)
 ```
 
-Integrates the Lorenz equations (σ = 10, ρ = 28, β = 8/3) from (9, 9, 25) with a forward-Euler step of `dt = 0.01` for `n` steps, and returns the x-component (length `n + 1`). Set `plot=True` to draw the 3-D attractor.
+Integrates the Lorenz equations (σ = 10, ρ = 28, β = 2.667 ≈ 8/3) from (9, 9, 25) with a forward-Euler step of `dt = 0.01` for `n` steps, and returns the x-component (length `n + 1`). Set `plot=True` to draw the 3-D attractor.
 
 ---
 
@@ -165,6 +159,7 @@ pip install -r requirements.txt
 ## Quick start
 
 ```python
+import matplotlib.pyplot as plt
 from lorenz import Lorenz
 from ami import AMI
 from fnn import false_nearest_neighbors
@@ -176,7 +171,10 @@ R, dim = false_nearest_neighbors(X, tau, D=10,      # 2. choose the dimension
                                  thr=0.01, plot=True)
 
 print(f"tau = {tau}, embedding dimension = {dim}")
+plt.show()                                          # display the FNN plot
 ```
+
+Note that `AMI(..., plot=True)` opens its figure immediately, while `false_nearest_neighbors(..., plot=True)` only creates the figure, so call `plt.show()` to display it.
 
 Each module also runs a self-contained demo:
 
@@ -187,9 +185,9 @@ python fnn.py   # FNN curve plus 2-D and 3-D reconstructions of the attractor
 
 ## Example results
 
-**Lorenz system.** With 1,000 samples, AMI gives τ ≈ 16–17 samples and FNN gives **d = 3**, matching the true dimension of the Lorenz system.
+**Lorenz system.** With 1,000 samples, AMI gives τ = 16 samples and FNN gives **d = 3**, matching the true dimension of the Lorenz system.
 
-**Rat EEG.** In the original project the tools were applied to EEG recorded from rats with pilocarpine-induced chronic temporal-lobe epilepsy (two temporal-lobe EEG electrodes, two occipital reference electrodes, and neck EMG), sampled at 15,000 samples per minute (250 Hz). Processing the signal in one-minute windows, the delay was typically τ ≈ 25–33 samples and the embedding dimension d = 6 (with `thr = 0.01`, `D = 10`, `m = 100`). The recordings themselves are not included in this repository.
+**Rat EEG.** In the original project the tools were applied to EEG recorded from rats with pilocarpine-induced chronic temporal-lobe epilepsy (two temporal-lobe EEG electrodes, two occipital reference electrodes, and neck EMG), sampled at 15,000 samples per minute (250 Hz). Processing the signal in one-minute windows, the delay was typically τ ≈ 25–33 samples and the embedding dimension usually d = 6, occasionally 5 or 7 (with `thr = 0.01`, `D = 10`, `m = 100`). The recordings themselves are not included in this repository.
 
 ## Parameter tips
 
